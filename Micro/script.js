@@ -14,10 +14,11 @@ function renderPosts() {
             <div class="post-content">${post.content} <span class="likes">${post.likes} ❤️</span></div>
             <button onclick="likePost(${index})">Like</button>
             <div class="comments">
-                <input type="text" id="commentInput${index}" placeholder="Add a comment">
+                <input type="text" id="usernameInput${index}" placeholder="Your username" required>
+                <input type="text" id="commentInput${index}" placeholder="Add a comment" required>
                 <button onclick="addComment(${index})">Comment</button>
                 <div class="comment-list" id="commentList${index}">
-                    ${post.comments.map(comment => `<div class="comment">${comment}</div>`).join('')}
+                    ${post.comments.map(comment => `<div class="comment"><strong>${comment.username}:</strong> ${comment.text}</div>`).join('')}
                 </div>
             </div>
             <div class="emoji-container">
@@ -38,6 +39,7 @@ postButton.addEventListener('click', () => {
         posts.push({ content, likes: 0, comments: [] });
         postContent.value = '';
         renderPosts();
+        updateLocalStorage(); // Save to local storage
     }
 });
 
@@ -45,21 +47,41 @@ postButton.addEventListener('click', () => {
 function likePost(index) {
     posts[index].likes += 1;
     renderPosts();
+    updateLocalStorage(); // Save to local storage
 }
 
 // Function to add a comment
 function addComment(index) {
+    const usernameInput = document.getElementById(`usernameInput${index}`);
     const commentInput = document.getElementById(`commentInput${index}`);
+    const username = usernameInput.value.trim();
     const comment = commentInput.value.trim();
-    if (comment) {
-        posts[index].comments.push(comment);
+    if (username && comment) {
+        posts[index].comments.push({ username, text: comment });
+        usernameInput.value = '';
         commentInput.value = '';
         renderPosts();
+        updateLocalStorage(); // Save to local storage
     }
 }
 
 // Function to add an emoji
 function addEmoji(index, emoji) {
-    posts[index].comments.push(emoji);
+    posts[index].comments.push({ username: 'Anonymous', text: emoji }); // Default to "Anonymous" for emojis
     renderPosts();
+    updateLocalStorage(); // Save to local storage
+}
+
+// Load posts from local storage on initial load
+window.onload = () => {
+    const storedPosts = JSON.parse(localStorage.getItem('posts'));
+    if (storedPosts) {
+        posts = storedPosts;
+        renderPosts();
+    }
+};
+
+// Update local storage whenever posts change
+function updateLocalStorage() {
+    localStorage.setItem('posts', JSON.stringify(posts));
 }
