@@ -13,12 +13,18 @@ function renderPosts() {
         postDiv.innerHTML = `
             <div class="post-content">${post.content} <span class="likes">${post.likes} ❤️</span></div>
             <button onclick="likePost(${index})">Like</button>
+            <button onclick="deletePost(${index})">Delete Post</button>
             <div class="comments">
                 <input type="text" id="usernameInput${index}" placeholder="Your username" required>
                 <input type="text" id="commentInput${index}" placeholder="Add a comment" required>
                 <button onclick="addComment(${index})">Comment</button>
                 <div class="comment-list" id="commentList${index}">
-                    ${post.comments.map(comment => `<div class="comment"><strong>${comment.username}:</strong> ${comment.text}</div>`).join('')}
+                    ${post.comments.map((comment, commentIndex) => `
+                        <div class="comment">
+                            <strong>${comment.username}:</strong> ${comment.text}
+                            <button onclick="deleteComment(${index}, ${commentIndex})">Delete</button>
+                        </div>
+                    `).join('')}
                 </div>
             </div>
             <div class="emoji-container">
@@ -50,6 +56,13 @@ function likePost(index) {
     updateLocalStorage(); // Save to local storage
 }
 
+// Function to delete a post
+function deletePost(index) {
+    posts.splice(index, 1); // Remove the post from the array
+    renderPosts();
+    updateLocalStorage(); // Save to local storage
+}
+
 // Function to add a comment
 function addComment(index) {
     const usernameInput = document.getElementById(`usernameInput${index}`);
@@ -63,6 +76,13 @@ function addComment(index) {
         renderPosts();
         updateLocalStorage(); // Save to local storage
     }
+}
+
+// Function to delete a comment
+function deleteComment(postIndex, commentIndex) {
+    posts[postIndex].comments.splice(commentIndex, 1); // Remove the comment from the array
+    renderPosts();
+    updateLocalStorage(); // Save to local storage
 }
 
 // Function to add an emoji
