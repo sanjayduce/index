@@ -3,16 +3,12 @@ const postButton = document.getElementById('postButton');
 const postContent = document.getElementById('postContent');
 const loginContainer = document.getElementById('loginContainer');
 const loginButton = document.getElementById('loginButton');
+const usernameInput = document.getElementById('username');
+const postForm = document.getElementById('postForm');
 const loginError = document.getElementById('loginError');
 
-let posts = []; // This will act as our in-memory database
-let loggedInUser = null; // To track the logged-in user
-
-// Example user data for login (this should ideally come from a secure database)
-const users = {
-    'user1': 'password1',
-    'user2': 'password2',
-};
+let posts = [];
+let currentUser = null; // To track the logged-in user
 
 // Function to render posts
 function renderPosts() {
@@ -50,28 +46,17 @@ function renderPosts() {
 
 // Function to handle login
 loginButton.addEventListener('click', () => {
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
-    
-    if (users[username] && users[username] === password) {
-        loggedInUser = username;
-        loginContainer.style.display = 'none';
-        postsContainer.style.display = 'block';
-        loadPosts();
-        renderPosts();
+    const username = usernameInput.value.trim();
+    if (username) {
+        currentUser = username; // Set the logged-in user
+        loginContainer.style.display = 'none'; // Hide the login form
+        postForm.style.display = 'block'; // Show the post form
+        renderPosts(); // Render posts if any
+        updateLocalStorage(); // Save to local storage
     } else {
-        loginError.textContent = 'Invalid username or password.';
+        loginError.style.display = 'block'; // Show error for invalid login
     }
 });
-
-// Function to load posts from local storage
-function loadPosts() {
-    const storedPosts = JSON.parse(localStorage.getItem('posts'));
-    if (storedPosts) {
-        posts = storedPosts;
-        renderPosts();
-    }
-}
 
 // Function to post new content
 postButton.addEventListener('click', () => {
@@ -84,14 +69,60 @@ postButton.addEventListener('click', () => {
     }
 });
 
-// Other functions remain the same...
+// Function to like a post
+function likePost(index) {
+    posts[index].likes += 1;
+    renderPosts();
+    updateLocalStorage(); // Save to local storage
+}
+
+// Function to delete a post
+function deletePost(index) {
+    posts.splice(index, 1); // Remove the post from the array
+    renderPosts();
+    updateLocalStorage(); // Save to local storage
+}
+
+// Function to add a comment
+function addComment(index) {
+    const usernameInput = document.getElementById(`usernameInput${index}`);
+    const commentInput = document.getElementById(`commentInput${index}`);
+    const username = currentUser || usernameInput.value.trim();
+    const comment = commentInput.value.trim();
+    if (username && comment) {
+        posts[index].comments.push({ username, text: comment });
+        usernameInput.value = '';
+        commentInput.value = '';
+        renderPosts();
+        updateLocalStorage(); // Save to local storage
+    }
+}
+
+// Function to delete a comment
+function deleteComment(postIndex, commentIndex) {
+    posts[postIndex].comments.splice(commentIndex, 1); // Remove the comment from the array
+    renderPosts();
+    updateLocalStorage(); // Save to local storage
+}
+
+// Function to add an emoji
+function addEmoji(index, emoji) {
+    posts[index].comments.push({ username: 'Anonymous', text: emoji }); // Default to "Anonymous" for emojis
+    renderPosts();
+    updateLocalStorage(); // Save to local storage
+}
+
+// Load posts from local storage on initial load
+window.onload = () => {
+    const storedPosts = JSON.parse(localStorage.getItem('posts'));
+    if (storedPosts) {
+        posts = storedPosts;
+    }
+    // Show the login form
+    loginContainer.style.display = 'block';
+};
 
 // Update local storage whenever posts change
 function updateLocalStorage() {
     localStorage.setItem('posts', JSON.stringify(posts));
 }
-
-// On initial load, show login form
-window.onload = () => {
-    loadPosts();
-};
