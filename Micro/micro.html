@@ -9,11 +9,20 @@
 <body>
     <div class="container">
         <h1>Microblogging App</h1>
-        <div class="post-form">
+        
+        <div id="loginContainer">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button id="loginButton">Login</button>
+            <div id="loginError" style="color: red;"></div>
+        </div>
+
+        <div class="post-form" style="display:none;" id="postForm">
             <textarea id="postContent" placeholder="What's happening?" required></textarea>
             <button id="postButton">Post</button>
         </div>
-        <div class="posts" id="postsContainer"></div>
+        
+        <div class="posts" id="postsContainer" style="display:none;"></div>
     </div>
     <script src="script.js"></script>
 </body>
