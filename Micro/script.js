@@ -1,14 +1,8 @@
 const postsContainer = document.getElementById('postsContainer');
 const postButton = document.getElementById('postButton');
 const postContent = document.getElementById('postContent');
-const loginContainer = document.getElementById('loginContainer');
-const loginButton = document.getElementById('loginButton');
-const usernameInput = document.getElementById('username');
-const postForm = document.getElementById('postForm');
-const loginError = document.getElementById('loginError');
 
-let posts = [];
-let currentUser = null; // To track the logged-in user
+let posts = []; // This will act as our in-memory database
 
 // Function to render posts
 function renderPosts() {
@@ -44,20 +38,6 @@ function renderPosts() {
     });
 }
 
-// Function to handle login
-loginButton.addEventListener('click', () => {
-    const username = usernameInput.value.trim();
-    if (username) {
-        currentUser = username; // Set the logged-in user
-        loginContainer.style.display = 'none'; // Hide the login form
-        postForm.style.display = 'block'; // Show the post form
-        renderPosts(); // Render posts if any
-        updateLocalStorage(); // Save to local storage
-    } else {
-        loginError.style.display = 'block'; // Show error for invalid login
-    }
-});
-
 // Function to post new content
 postButton.addEventListener('click', () => {
     const content = postContent.value.trim();
@@ -87,7 +67,7 @@ function deletePost(index) {
 function addComment(index) {
     const usernameInput = document.getElementById(`usernameInput${index}`);
     const commentInput = document.getElementById(`commentInput${index}`);
-    const username = currentUser || usernameInput.value.trim();
+    const username = usernameInput.value.trim();
     const comment = commentInput.value.trim();
     if (username && comment) {
         posts[index].comments.push({ username, text: comment });
@@ -117,9 +97,8 @@ window.onload = () => {
     const storedPosts = JSON.parse(localStorage.getItem('posts'));
     if (storedPosts) {
         posts = storedPosts;
+        renderPosts();
     }
-    // Show the login form
-    loginContainer.style.display = 'block';
 };
 
 // Update local storage whenever posts change
